@@ -1,45 +1,65 @@
-/* 
-import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt-nodejs';
-
-import { IUser } from '../interfaces/models/user';
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from 'jsonwebtoken';
+import Joi from '@hapi/joi';
 import mongoose from '../providers/Database';
+import  Locals  from "../providers/Locals";
+import { INext } from "../interfaces";
 
-// Create the model schema & register your custom methods here
-export interface IUserModel extends IUser, mongoose.Document {
-	billingAddress(): string;
-	comparePassword(password: string, cb: any): string;
-	validPassword(password: string, cb: any): string;
-	gravatar(_size: number): string;
-}
-
-// Define the User Schema
-export const UserSchema = new mongoose.Schema({
-	email: { type: String, unique: true },
-	password: { type: String },
-	passwordResetToken: { type: String },
-	passwordResetExpires: Date,
-
-	facebook: { type: String },
-	twitter: { type: String },
-	google: { type: String },
-	github: { type: String },
-	instagram: { type: String },
-	linkedin: { type: String },
-	steam: { type: String },
-	tokens: Array,
-
-	fullname: { type: String },
-	gender: { type: String },
-	geolocation: { type: String },
-	website: { type: String },
-	picture: { type: String }
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+	required: [true, 'name is required'],
+	minlength: 3,
+    maxlength: 50
+  },
+  email: {
+    type: String,
+	required: [true, 'email is required'],
+	minlength: 5,
+    maxlength: 255,
+    unique: true
+  },
+  password: {
+    type: String,
+	required: [true, 'password is required'],
+    minlength: 5,
+    maxlength: 1024
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+  isAdmin: Boolean
 }, {
-	timestamps: true
+	timestamps: true,
+	toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+
+UserSchema.methods.generateAuthToken = function() { 
+  const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, Locals.config().appSecret);
+  return token;
+}
+
+// Generate and hash password token
+UserSchema.methods.getResetPasswordToken = function() {
+	// Generate token
+	const resetToken = crypto.randomBytes(20).toString('hex');
+  
+	// Hash token and set to resetPasswordToken field
+	this.resetPasswordToken = crypto
+	  .createHash('sha256')
+	  .update(resetToken)
+	  .digest('hex');
+  
+	// Set expire
+	this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  
+	return resetToken;
+  };
+
 // Password hash middleware
-UserSchema.pre<IUserModel>('save', function (_next) {
+UserSchema.pre<any>('save', function (_next : INext) {
 	const user = this;
 	if (!user.isModified('password')) {
 		return _next();
@@ -50,7 +70,7 @@ UserSchema.pre<IUserModel>('save', function (_next) {
 			return _next(_err);
 		}
 
-		bcrypt.hash(user.password, _salt, null, (_err, _hash) => {
+		bcrypt.hash(user.password , _salt, (_err : any, _hash: any) => {
 			if (_err) {
 				return _next(_err);
 			}
@@ -61,36 +81,28 @@ UserSchema.pre<IUserModel>('save', function (_next) {
 	});
 });
 
-// Custom Methods
-// Get user's full billing address
-UserSchema.methods.billingAddress = function (): string {
-	const fulladdress = `${this.fullname.trim()} ${this.geolocation.trim()}`;
-	return fulladdress;
-};
 
 // Compares the user's password with the request password
-UserSchema.methods.comparePassword = function (_requestPassword, _cb): any {
+UserSchema.methods.comparePassword = function (_requestPassword: any, _cb: any): any {
 	bcrypt.compare(_requestPassword, this.password, (_err, _isMatch) => {
 		return _cb(_err, _isMatch);
 	});
 };
 
-// User's gravatar
-UserSchema.methods.gravatar = function (_size): any {
-	if (! _size) {
-		_size = 200;
-	}
+const User = mongoose.model('User', UserSchema);
 
-	const url = 'https://gravatar.com/avatar';
-	if (! this.email) {
-		return `${url}/?s=${_size}&d=retro`;
-	}
+/* ======= Can Use Joi as well for validation  =============*/
+/* 
+function validateUser(user: any) {
+  const schema = {
+    name: Joi.string().min(5).max(50).required(),
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().min(5).max(255).required()
+  };
 
-	const md5 = crypto.createHash('md5').update(this.email).digest('hex');
-	return `${url}/${md5}?s=${_size}&d=retro`;
-};
-
-const User = mongoose.model<IUserModel>('User', UserSchema);
-
-export default User;
+  return Joi.valid(user, schema);
+}
  */
+
+exports.User = User; 
+// exports.validate = validateUser;

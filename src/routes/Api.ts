@@ -1,7 +1,6 @@
 
 import { Router } from 'express';
 
-import Locals from '../providers/Locals';
 
 import HomeController  from '../controllers/HomeController';
 
