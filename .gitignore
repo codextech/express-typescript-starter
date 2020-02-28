@@ -5,3 +5,9 @@
 
 # dependencies
 /node_modules
+
+.vscode
+package-lock.json
+.cache/
+.env.example
+.logs/*.log
