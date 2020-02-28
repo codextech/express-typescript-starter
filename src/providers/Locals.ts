@@ -14,7 +14,7 @@ class Locals {
 		const url = process.env.APP_URL || `http://localhost:${process.env.PORT}`;
 		const port = process.env.PORT || 3000;
 		const appSecret = process.env.APP_SECRET || 'My Secret Code!';
-		const mongooseUrl = process.env.MONGOOSE_URL;
+		const mongooseUrl = process.env.MONGOOSE_URL || 'mongodb://127.0.0.1:27017/express-typescript';
 		const maxUploadLimit = process.env.APP_MAX_UPLOAD_LIMIT || '50mb';
 		const maxParameterLimit = process.env.APP_MAX_PARAMETER_LIMIT || '50';
 		const isCORSEnabled = process.env.CORS_ENABLED || true;
