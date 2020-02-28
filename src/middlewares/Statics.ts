@@ -1,9 +1,3 @@
-/**
- * Defines all the app-statics
- *
- * @author Faiz A. Farooqui <faiz@geekyants.com>
- */
-
 import * as path from 'path';
 import * as express from 'express';
 

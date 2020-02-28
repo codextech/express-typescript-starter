@@ -1,8 +1,3 @@
-/**
- * Define all your routes
- *
- * @author Faiz A. Farooqui <faiz@geekyants.com>
- */
 
 import { Application } from 'express';
 import Locals from './Locals';

@@ -1,8 +1,3 @@
-/**
- * Define App Locals & Configs
- *
- * @author Faiz A. Farooqui <faiz@geekyants.com>
- */
 
 import { Application } from 'express';
 import * as path from 'path';

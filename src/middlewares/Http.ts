@@ -1,8 +1,3 @@
-/**
- * Defines all the requisites in HTTP
- *
- * @author Faiz A. Farooqui <faiz@geekyants.com>
- */
 
 import cors from 'cors';
 import { Application } from 'express';
