@@ -8,7 +8,7 @@ App.loadConfiguration();
 /**
  * Run the Database pool
  */
-// App.loadDatabase();
+App.loadDatabase();
 
 /**
  * Run the Server
