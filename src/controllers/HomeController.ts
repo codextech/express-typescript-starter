@@ -1,6 +1,7 @@
 import { IRequest, IResponse, INext } from "../interfaces/index";
 import { ErrorResponse } from "../utils/ErrorResponse";
 import User from "../models/User";
+import { IUserModel, IUser } from "../interfaces/model/user.interface";
 
 
 
@@ -8,27 +9,24 @@ class HomeController {
 	public static async index (req: IRequest, res: IResponse, next: INext) {
         try {
             
-          
-          
-          // let user = await  User.findById({}) ;
-
           // call from db
-            let obj  = {foo : 'foo'} || null;
+         let  user = await  User.find({}) ;
 
-            if (!obj) {
+            if (!user) {
                 return next(
                   new ErrorResponse(`Not found`, 404)
                 );
               }
 
+
             return res.status(200).json({
                 success: true,
-                data: obj
+                data: user
             });
             
         } catch (error) {
             return next(
-                new ErrorResponse()
+                new ErrorResponse(error)
               );
         }
 	}
