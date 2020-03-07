@@ -1,13 +1,18 @@
 import { IRequest, IResponse, INext } from "../interfaces/index";
 import { ErrorResponse } from "../utils/ErrorResponse";
+import User from "../models/User";
+
 
 
 class HomeController {
-	public static index (req: IRequest, res: IResponse, next: INext) {
+	public static async index (req: IRequest, res: IResponse, next: INext) {
         try {
             
-        
-            // call from db
+          
+          
+          // let user = await  User.findById({}) ;
+
+          // call from db
             let obj  = {foo : 'foo'} || null;
 
             if (!obj) {

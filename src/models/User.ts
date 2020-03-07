@@ -5,6 +5,8 @@ import Joi from '@hapi/joi';
 import mongoose from '../providers/Database';
 import  Locals  from "../providers/Locals";
 import { INext } from "../interfaces";
+import { IUserModel } from "../interfaces/model/user.interface";
+import { Model, model } from "mongoose";
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -58,8 +60,16 @@ UserSchema.methods.getResetPasswordToken = function() {
 	return resetToken;
   };
 
+
+// Compares the user's password with the request password
+UserSchema.methods.comparePassword = function (_requestPassword: any, _cb: any): any {
+	bcrypt.compare(_requestPassword, this.password, (_err, _isMatch) => {
+		return _cb(_err, _isMatch);
+	});
+};
+
 // Password hash middleware
-UserSchema.pre<any>('save', function (_next : INext) {
+UserSchema.pre<IUserModel>('save', function (_next : INext) {
 	const user = this;
 	if (!user.isModified('password')) {
 		return _next();
@@ -82,14 +92,8 @@ UserSchema.pre<any>('save', function (_next : INext) {
 });
 
 
-// Compares the user's password with the request password
-UserSchema.methods.comparePassword = function (_requestPassword: any, _cb: any): any {
-	bcrypt.compare(_requestPassword, this.password, (_err, _isMatch) => {
-		return _cb(_err, _isMatch);
-	});
-};
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model<IUserModel>('User', UserSchema);
 
 /* ======= Can Use Joi as well for validation  =============*/
 /* 
@@ -104,5 +108,6 @@ function validateUser(user: any) {
 }
  */
 
-exports.User = User; 
-// exports.validate = validateUser;
+export default User; 
+
+
